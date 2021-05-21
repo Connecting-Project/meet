@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Hawaiian-Pizza</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+    <link rel="stylesheet" href="assets/css/meet.css">
+    
+</head>
+
+<body>
+    <div class="meet-container">
+        <div id="videos">
+            <video id="localVideo" autoplay muted playsinline></video>
+            <video id="remoteVideo" autoplay playsinline></video>
+        </div>
+        <div class="footer">
+            <div class="contents">
+                <div class="content" id="micbox" onclick="clickMicrophone();">
+                    <i id="micbtn" class="fas fa-microphone"></i>
+                    <i id="micbtn-slash" class="fas fa-microphone-slash"></i>
+                </div>
+                <div class="content" id="outbox" onclick="clickOutbtn();">
+                    <i id="outbtn" class="fas fa-sign-out-alt"></i>
+                </div>
+                <div class="content" id="videobox" onclick="clickVideo();">
+                    <i id="videobtn" class="fas fa-video"></i>
+                    <i id="video-slash" class="fas fa-video-slash"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script src="/assets/js/meet.js"></script>
+    <script src="https://use.fontawesome.com/releases/v5.2.0/js/all.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,54 @@
+.meet-container{
+    min-height: 100vh;
+}
+
+.meet-container{
+    background-color: #6f7075;
+}
+
+body{
+    margin: 0;
+    border: 0;
+}
+
+.footer{
+    background-color: #FFFFFF;
+    position: fixed; 
+    bottom: 0; 
+    width: 100%;
+}
+
+.contents{
+    width: 360px;
+    margin: 0 auto;
+}
+
+.content{
+    height: 25px;
+    width: 25px;
+    border-radius: 50%;
+    border: 1px solid rgb(189, 189, 189);
+    display: inline-block;
+    margin: 20px 15px;
+    padding: 20px;
+    text-align: center;
+    z-index: 100;
+}
+
+.content:hover{
+    background-color: #f1f1f1;
+    box-shadow: 0px 0px 10px #f1f1f1;
+    cursor: pointer;
+}
+
+#micbtn-slash{
+    display: none;
+}
+
+#video-slash{
+    display: none;
+}
+
+#outbtn {
+    color: #d93025;
+}
