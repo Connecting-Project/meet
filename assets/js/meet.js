@@ -7,8 +7,7 @@ var localStream;
 var pc;
 var remoteStream;
 var turnReady;
-var currentVideo;
-var currentAudio;
+
 
 var pcConfig = {
   'iceServers': [{
@@ -108,6 +107,7 @@ navigator.mediaDevices.getUserMedia({
 });
 
 function gotStream(stream) {
+
   console.log('Adding local stream.');
   localStream = stream;
   localVideo.srcObject = stream;
@@ -277,15 +277,14 @@ function clickMicrophone() {
         micbtnSlash.style.display = "none";
         micbox.style.backgroundColor = "#FFFFFF";
 
-        navigator.mediaDevices.getUserMedia({
-          audio: true
-        })
-        .then(gotStream)
-        .catch(function(e) {
-          alert('getUserMedia() error: ' + e.name);
-        });
+        localStream.getTracks().forEach(function(track) {
+          if(track.readyState === 'live' && track.kind === "audio"){
+              track.enabled = true;
+          }
+      });
 
     }else{
+
         micbtn.style.display = "none";
         micbtnSlash.style.display = "inline-block";
         micbtnSlash.style.color = "#FFFFFF";
@@ -293,7 +292,7 @@ function clickMicrophone() {
 
         localStream.getTracks().forEach(function(track) {
             if(track.readyState === 'live' && track.kind === "audio"){
-                track.stop();
+                track.enabled = false;
             }
         });
     }
@@ -310,29 +309,35 @@ function clickVideo() {
         videoSlash.style.display = "none";
         videobox.style.backgroundColor = "#FFFFFF";
 
-        navigator.mediaDevices.getUserMedia({
-            video: true
-          })
-          .then(gotStream)
-          .catch(function(e) {
-            alert('getUserMedia() error: ' + e.name);
-          });
-
-    }else{
-        videobtn.style.display = "none";
-        videoSlash.style.display = "inline-block";
-        videoSlash.style.color = "#FFFFFF";
-        videobox.style.backgroundColor = "#d93025";
-
+        
         localStream.getTracks().forEach(function(track) {
-            if(track.readyState === 'live' && track.kind === "video"){
-                track.stop();
-            }
+          if(track.readyState === "live" && track.kind === "video"){
+            track.enabled = true;
+          }
         });
+    }else{
+      
+      videobtn.style.display = "none";
+      videoSlash.style.display = "inline-block";
+      videoSlash.style.color = "#FFFFFF";
+      videobox.style.backgroundColor = "#d93025";
+      
+      localStream.getTracks().forEach(function(track) {
+        if(track.readyState === "live" && track.kind === "video"){
+          track.enabled = false;
+        }
+      });
+
+        
     }
 }
 
 function clickOutbtn() {
-    stop();
+  if(pc){
+    pc.close();
+    window.close();
+  }else{
+    window.close();
+  }
 }
 
