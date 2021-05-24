@@ -64,4 +64,9 @@ io.sockets.on('connection', function(socket) {
     console.log('received bye');
   });
 
+  socket.on('sendchat',function(data){
+    socket.broadcast.emit('receivechat', data);
+    socket.emit('receivechat', data);
+  });
+
 });
