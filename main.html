@@ -19,14 +19,35 @@
             <video id="localVideo" autoplay muted playsinline></video>
             <video id="remoteVideo" autoplay playsinline></video>
         </div>
-        <textarea id="dataChannelSend" disabled
-    placeholder="Press Start, enter some text, then press Send."></textarea>
-  <textarea id="dataChannelReceive" disabled></textarea>
-        <div id="buttons">
-            <button id="startButton">Start</button>
-            <button id="sendButton">Send</button>
-            <button id="closeButton">Stop</button>
-          </div>
+            <div class="chat_wrap">
+                <div class="header">
+                    CHAT
+                </div>
+                <div class="chat">
+                    <ul>
+                        <!-- 동적 생성 -->
+                    </ul>
+                </div>
+                <div class="input-div">
+                    <textarea placeholder="Press Enter for send message."></textarea>
+                </div>
+             
+                <!-- format -->
+             
+                <div class="chat format">
+                    <ul>
+                        <li>
+                            <div class="sender">
+                                <span></span>
+                            </div>
+                            <div class="message">
+                                <span></span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+        </div>
+        
         <div class="footer">
             <div class="contents">
                 <div class="content" id="micbox" onclick="clickMicrophone();">
@@ -43,6 +64,7 @@
             </div>
         </div>
     </div>
+    <script src="/assets/js/jquery-3.6.0.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
     <script src="/assets/js/meet.js"></script>

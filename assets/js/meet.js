@@ -7,7 +7,7 @@ var localStream;
 var pc;
 var remoteStream;
 var turnReady;
-
+var clientId;
 
 var pcConfig = {
   'iceServers': [{
@@ -37,8 +37,9 @@ if (room !== '') {
   console.log('Attempted to create or  join room', room);
 }
 
-socket.on('created', function(room) {
+socket.on('created', function(room, id) {
   console.log('Created room ' + room);
+  clientId = id;
   isInitiator = true;
 });
 
@@ -52,8 +53,9 @@ socket.on('join', function (room){
   isChannelReady = true;
 });
 
-socket.on('joined', function(room) {
+socket.on('joined', function(room, id) {
   console.log('joined: ' + room);
+  clientId = id;
   isChannelReady = true;
 });
 
@@ -91,6 +93,93 @@ socket.on('message', function(message) {
     handleRemoteHangup();
   }
 });
+
+const Chat = (function(){
+  var myName = prompt("닉네임을 입력해주세요.", Math.random().toString(36).substr(2,11));
+  while(true){
+    if(myName.trim() === ""){
+      alert('닉네임을 입력해주세요.');
+      var myName = prompt("닉네임을 입력해주세요.", Math.random().toString(36).substr(2,11));
+    }else{
+      break;
+    }
+  }
+  // init 함수
+  function init() {
+      // enter 키 이벤트
+      $(document).on('keydown', 'div.input-div textarea', function(e){
+          if(e.keyCode == 13 && !e.shiftKey) {
+              e.preventDefault();
+              const message = $(this).val();
+
+              // 메시지 전송
+              sendMessage(message);
+              // 입력창 clear
+              clearTextarea();
+          }
+      });
+  }
+
+  // 메세지 태그 생성
+  function createMessageTag(LR_className, senderName, message) {
+      // 형식 가져오기
+      let chatLi = $('div.chat.format ul li').clone();
+
+      // 값 채우기
+      chatLi.addClass(LR_className);
+      chatLi.find('.sender span').text(senderName);
+      chatLi.find('.message span').text(message);
+
+      return chatLi;
+  }
+
+  // 메세지 태그 append
+  function appendMessageTag(LR_className, senderName, message) {
+      const chatLi = createMessageTag(LR_className, senderName, message);
+
+      $('div.chat:not(.format) ul').append(chatLi);
+
+      // 스크롤바 아래 고정
+      $('div.chat').scrollTop($('div.chat').prop('scrollHeight'));
+  }
+
+  // 메세지 전송
+  function sendMessage(message) {
+      // 서버에 전송하는 코드로 후에 대체
+      const data = {
+          "senderName":myName,
+          "message":message,
+          "clientId":clientId,
+      };
+      socket.emit("sendchat", data);
+  }
+
+  // 메세지 입력박스 내용 지우기
+  function clearTextarea() {
+      $('div.input-div textarea').val('');
+  }
+
+  // 메세지 수신
+  function receive(data) {
+      const LR = (data.clientId !== clientId)? "left" : "right";
+      appendMessageTag( LR, data.senderName, data.message);
+  }
+
+  
+  return {
+    'init': init,
+    'receive': receive,
+  };
+})();
+
+$(function(){
+  Chat.init();
+  socket.on('receivechat',function(data){
+    console.log(data);
+    Chat.receive(data);
+  });
+});
+
 
 ////////////////////////////////////////////////////
 
