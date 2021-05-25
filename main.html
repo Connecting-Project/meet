@@ -18,6 +18,7 @@
         <div id="videos">
             <video id="localVideo" autoplay muted playsinline></video>
             <video id="remoteVideo" autoplay playsinline></video>
+            <video id="displayVideo" autoplay playsinline></video>
         </div>
             <div class="chat_wrap">
                 <div class="header">
@@ -54,13 +55,21 @@
                     <i id="micbtn" class="fas fa-microphone"></i>
                     <i id="micbtn-slash" class="fas fa-microphone-slash"></i>
                 </div>
+
                 <div class="content" id="outbox" onclick="clickOutbtn();">
                     <i id="outbtn" class="fas fa-sign-out-alt"></i>
                 </div>
+
                 <div class="content" id="videobox" onclick="clickVideo();">
                     <i id="videobtn" class="fas fa-video"></i>
                     <i id="video-slash" class="fas fa-video-slash"></i>
                 </div>
+
+                <div class="content" id="displaybox" onclick="clickDisplay();">
+                    <i id="btn" class="fas fa-display"></i>
+                    <i id="display-slash" class="fas fa-display-slash"></i>
+                </div>
+                
             </div>
         </div>
     </div>
