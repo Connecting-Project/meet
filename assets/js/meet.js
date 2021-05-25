@@ -4,6 +4,7 @@ var isChannelReady = false;
 var isInitiator = false;
 var isStarted = false;
 var localStream;
+var displayStream;
 var pc;
 var remoteStream;
 var turnReady;
@@ -27,7 +28,7 @@ var sdpConstraints = {
 var temp = location.href.split("?");
 var data = temp[1].split(":");
 var room = data[1];
-
+        
 // Could prompt for room name:
 // room = prompt('Enter room name:');
 
@@ -97,6 +98,7 @@ socket.on('message', function(message) {
 
 var localVideo = document.querySelector('#localVideo');
 var remoteVideo = document.querySelector('#remoteVideo');
+var displayVideo = document.querySelector('#displayVideo');
 
 navigator.mediaDevices.getUserMedia({
   audio: true,
@@ -331,6 +333,28 @@ function clickVideo() {
         });
     }
 }
+
+function clickDisplay() {
+ console.log();
+navigator.mediaDevices.getDisplayMedia({
+	audio: true,
+	video: true
+}).then(function(stream){
+  console.log('Adding Display stream.');
+  displayStream = stream;
+  displayVideo.srcObject = stream;
+  sendMessage('got user media');
+  if (isInitiator) {
+    maybeStart();
+  }
+	//success
+}).catch(function(e){
+  alert('getDisplayMedia() error: '+ e.name)
+	//error;
+});
+
+}
+
 
 function clickOutbtn() {
     stop();
