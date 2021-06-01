@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script lang="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script src="/simple-peer/simplepeer.min.js"></script>
+    <link rel="stylesheet" href="./css/meet.css">
+    <title>Hawaiian-Pizza</title>
+</head>
+<body>
+    <div class="meet-container">
+        <div id="videos" class="container">
+            <video id="localVideo" class="vid" autoplay muted></video>
+        </div>
+        <div class="chat_wrap">
+            <div class="header">
+                CHAT
+            </div>
+            <div class="chat">
+                <ul>
+                    <!-- 동적 생성 -->
+                </ul>
+            </div>
+            <div class="input-div">
+                <textarea id="chat-input" placeholder="Press Enter for send message."></textarea>
+            </div>
+
+            <!-- format -->
+
+            <div class="chat format">
+                <ul>
+                    <li>
+                        <div class="sender">
+                            <span></span>
+                        </div>
+                        <div class="message">
+                            <span></span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer">
+            <div class="share-contents">
+                <div class="content" id="sharebox" onclick="copylink();" data-tooltip-text="링크 공유하기">
+                    <i class="fas fa-link"></i>
+                </div>
+            </div>
+            <div class="contents">
+                <div class="content" id="micbox" onclick="toggleMute();" data-tooltip-text="마이크 끄기">
+                    <i id="micbtn" class="fas fa-microphone"></i>
+                    <i id="micbtn-slash" class="fas fa-microphone-slash"></i>
+                </div>
+
+                <div class="content" id="outbox" onclick="removeLocalStream();" data-tooltip-text="통화에서 나가기">
+                    <i id="outbtn" class="fas fa-sign-out-alt"></i>
+                </div>
+
+                <div class="content" id="videobox" onclick="toggleVid();" data-tooltip-text="비디오 끄기">
+                    <i id="videobtn" class="fas fa-video"></i>
+                    <i id="video-slash" class="fas fa-video-slash"></i>
+                </div>
+
+                <div class="content" id="displaybox" onclick="" data-tooltip-text="화면 공유하기">
+                    <i class="fas fa-external-link-alt"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src='/js/main.js' lang="text/javascript"></script>
+    <script src="https://use.fontawesome.com/releases/v5.2.0/js/all.js"></script>
+</body>
+</html>

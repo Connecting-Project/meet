@@ -148,6 +148,7 @@ const Chat = (function(){
   function sendMessage(message) {
       // 서버에 전송하는 코드로 후에 대체
       const data = {
+          "room":room,
           "senderName":myName,
           "message":message,
           "clientId":clientId,
@@ -185,7 +186,7 @@ $(function(){
 ////////////////////////////////////////////////////
 
 var localVideo = document.querySelector('#localVideo');
-var remoteVideo = document.querySelector('#remoteVideo');
+// var remoteVideo = document.querySelector('#remoteVideo');
 var displayVideo = document.querySelector('#displayVideo');
 
 navigator.mediaDevices.getUserMedia({
@@ -327,8 +328,16 @@ function requestTurn(turnURL) {
 
 function handleRemoteStreamAdded(event) {
   console.log('Remote stream added.');
+  var remotevideo = document.createElement('video');
   remoteStream = event.stream;
-  remoteVideo.srcObject = remoteStream;
+  remotevideo.srcObject = remoteStream;
+  remotevideo.autoplay=true;
+  remotevideo.muted = true;
+  remotevideo.playsInline = true;
+
+  document.querySelector('#videos').appendChild(remotevideo);
+
+
 }
 
 function handleRemoteStreamRemoved(event) {
@@ -447,9 +456,11 @@ navigator.mediaDevices.getDisplayMedia({
 
 function clickOutbtn() {
   if(pc){
+    isStarted = false;
     pc.close();
     window.close();
   }else{
+    isStarted = false;
     window.close();
   }
 }

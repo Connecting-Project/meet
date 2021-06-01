@@ -1,9 +1,19 @@
 {
-  "name": "webrtc-codelab",
-  "version": "0.0.1",
-  "description": "WebRTC codelab",
+  "name": "mywebrtc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
   "dependencies": {
-    "node-static": "^0.7.10",
-    "socket.io": "^2.0.4"
-  }
+    "express": "^4.17.1",
+    "httpolyglot": "^0.1.2",
+    "simple-peer": "^9.7.0",
+    "socket.io": "^2.4.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/app.js"
+  },
+  "author": "",
+  "license": "ISC"
 }
