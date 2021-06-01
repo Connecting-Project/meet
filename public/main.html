@@ -43,22 +43,27 @@
             </div>
         </div>
         <div class="footer">
+            <div class="share-contents">
+                <div class="content" id="sharebox" onclick="copylink();" data-tooltip-text="링크 공유하기">
+                    <i class="fas fa-link"></i>
+                </div>
+            </div>
             <div class="contents">
-                <div class="content" id="micbox" onclick="toggleMute();">
+                <div class="content" id="micbox" onclick="toggleMute();" data-tooltip-text="마이크 끄기">
                     <i id="micbtn" class="fas fa-microphone"></i>
                     <i id="micbtn-slash" class="fas fa-microphone-slash"></i>
                 </div>
 
-                <div class="content" id="outbox" onclick="removeLocalStream();">
+                <div class="content" id="outbox" onclick="removeLocalStream();" data-tooltip-text="통화에서 나가기">
                     <i id="outbtn" class="fas fa-sign-out-alt"></i>
                 </div>
 
-                <div class="content" id="videobox" onclick="toggleVid();">
+                <div class="content" id="videobox" onclick="toggleVid();" data-tooltip-text="비디오 끄기">
                     <i id="videobtn" class="fas fa-video"></i>
                     <i id="video-slash" class="fas fa-video-slash"></i>
                 </div>
 
-                <div class="content" id="displaybox" onclick="">
+                <div class="content" id="displaybox" onclick="" data-tooltip-text="화면 공유하기">
                     <i class="fas fa-external-link-alt"></i>
                 </div>
             </div>

@@ -434,20 +434,17 @@ function updateButtons() {
     }
 }
 
-////////////////////////////////////////
-
-// Area:
-function Area(Increment, Count, Width, Height, Margin = 10) {
-    let i = w = 0;
-    let h = Increment * 0.75 + (Margin * 2);
-    while (i < (Count)) {
-        if ((w + Increment) > Width) {
-            w = 0;
-            h = h + (Increment * 0.75) + (Margin * 2);
-        }
-        w = w + Increment + (Margin * 2);
-        i++;
-    }
-    if (h > Height) return false;
-    else return Increment;
+function copylink() {
+    copyToClipboard(window.document.location.href);
+    alert("회의 링크가 복사되었습니다.");
 }
+
+function copyToClipboard(val) {
+    const t = document.createElement("textarea");
+    document.body.appendChild(t);
+    t.value = val;
+    t.select();
+    document.execCommand('copy');
+    document.body.removeChild(t);
+  }
+
