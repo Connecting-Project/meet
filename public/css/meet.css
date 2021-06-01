@@ -21,7 +21,7 @@ html,body{
 }
 
 .contents{
-    width: 310px;
+    width: 480px;
     margin: 0 auto;
 }
 
@@ -35,7 +35,6 @@ html,body{
     padding: 20px;
     text-align: center;
     z-index: 100;
-    font-size: 23px;
 }
 
 .content:hover{
