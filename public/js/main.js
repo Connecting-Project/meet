@@ -371,8 +371,7 @@ function removeLocalStream() {
     for (let socket_id in peers) {
         removePeer(socket_id)
     }
-
-    window.close();
+    location.href = "/";
 }
 
 /**
