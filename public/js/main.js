@@ -18,6 +18,8 @@ if (location.href.substr(0, 5) !== 'https')
 var clientId;
 var myName;
 var room;
+var videoAvailable = true;
+var audioAvailable = true;
 //////////// CONFIGURATION //////////////////
 
 /**
@@ -42,14 +44,7 @@ const configuration = {
  */
 let constraints = {
     audio: true,
-    video: {
-        width: {
-            max: 300
-        },
-        height: {
-            max: 300
-        }
-    }
+    video: true,
 }
 
 /////////////////////////////////////////////////////////
@@ -58,16 +53,40 @@ constraints.video.facingMode = {
     ideal: "user"
 }
 
+
 // enabling the camera at startup
+
+
 navigator.mediaDevices.getUserMedia(constraints).then(stream => {
     console.log('Received local stream');
 
     localVideo.srcObject = stream;
     localStream = stream;
-
     init()
 
-}).catch(e => alert(`getusermedia error ${e.name}`))
+}).catch(e => init())
+
+    // navigator.mediaDevices.getUserMedia({video: true})
+    // .then(()=>videoAvailable = true)
+    // .catch(()=>videoAvailable = false);
+
+
+    // navigator.mediaDevices.getUserMedia({audio: true})
+    // .then(()=>audioAvailable = true)
+    // .catch(()=>audioAvailable = false);
+
+    // if(videoAvailable || audioAvailable){
+    //     navigator.mediaDevices.getUserMedia({video: videoAvailable, audio: audioAvailable}).then(stream => {
+    //         console.log('Received local stream');
+        
+    //         localVideo.srcObject = stream;
+    //         localStream = stream;
+    //         console.log("hello");
+    //         init()
+        
+    //     }).catch(e => alert(`getusermedia error ${e.name}`))
+    // }
+    
 
 /**
  * initialize the socket connections
@@ -281,7 +300,10 @@ function addPeer(socket_id, am_initiator) {
         newVid.onclick = () => openPictureMode(newVid)
         newVid.ontouchstart = (e) => openPictureMode(newVid)
         videos.appendChild(newVid)
+        Dish();
     })
+
+    
 }
 
 /**
@@ -447,3 +469,65 @@ function copyToClipboard(val) {
     document.body.removeChild(t);
   }
 
+
+
+
+  ///////////////////////////////////////////////////////////////////////
+
+  // Area:
+  function Area(Increment, Count, Width, Height, Margin = 10) {
+    let i = w = 0;
+    let h = Increment * 0.75 + (Margin * 2);
+    while (i < (Count)) {
+        if ((w + Increment) > Width) {
+            w = 0;
+            h = h + (Increment * 0.75) + (Margin * 2);
+        }
+        w = w + Increment + (Margin * 2);
+        i++;
+    }
+    if (h > Height) return false;
+    else return Increment;
+}
+// Dish:
+function Dish() {
+
+    // variables:
+        let Margin = 2;
+        let Scenary = document.getElementById('videos');
+        let Width = Scenary.offsetWidth - (Margin * 2);
+        let Height = Scenary.offsetHeight - (Margin * 2);
+        let Cameras = document.getElementsByClassName('vid');
+        let max = 0;
+    
+    // loop (i recommend you optimize this)
+        let i = 1;
+        while (i < 5000) {
+            let w = Area(i, Cameras.length, Width, Height, Margin);
+            if (w === false) {
+                max =  i - 1;
+                break;
+            }
+            i++;
+        }
+    
+    // set styles
+        max = max - (Margin * 2);
+        setWidth(max, Margin);
+}
+
+// Set Width and Margin 
+function setWidth(width, margin) {
+    let Cameras = document.getElementsByClassName('vid');
+    for (var s = 0; s < Cameras.length; s++) {
+        Cameras[s].style.width = width + "px";
+        Cameras[s].style.margin = margin + "px";
+        Cameras[s].style.height = (width * 0.75) + "px";
+    }
+}
+
+// Load and Resize Event
+window.addEventListener("load", function (event) {
+    Dish();
+    window.onresize = Dish;
+}, false);
