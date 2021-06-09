@@ -7,7 +7,6 @@ module.exports = (io) => {
 
         socket.on('create or join', function (room) {
             console.log('Received request to create or join room ' + room);
-
             var clientsInRoom = io.sockets.adapter.rooms[room];
             var numClients = clientsInRoom ? Object.keys(clientsInRoom.sockets).length : 0;
             console.log('Room ' + room + ' now has ' + numClients + ' client(s)');
@@ -47,7 +46,7 @@ module.exports = (io) => {
             if (!peers[data.socket_id]) return
             peers[data.socket_id].emit('signal', {
                 socket_id: socket.id,
-                signal: data.signal
+                signal: data.signal,
             })
         })
 
@@ -64,14 +63,14 @@ module.exports = (io) => {
          * Send message to client to initiate a connection
          * The sender has already setup a peer connection receiver
          */
-        socket.on('initSend', init_socket_id => {
+
+         socket.on('initSend', (init_socket_id) => {
             // console.log('INIT SEND by ' + socket.id + ' for ' + init_socket_id)
             peers[init_socket_id].emit('initSend', socket.id)
         })
 
-        
         socket.on('sendchat',function(data){
-            io.sockets.in(data.room).emit('receivechat', data);
+            io.sockets.in(data.room).emit('receivechat', data)
           });
 
     })
