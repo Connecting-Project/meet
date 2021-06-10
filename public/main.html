@@ -12,10 +12,17 @@
 <body>
     <div class="meet-container">
         <div id="videos" class="container">
-            <video id="localVideo" class="vid" autoplay muted></video>
-            <video id="localDisplay" class="vid" autoplay muted></video>
+            <div class="vid">
+                <video id="localVideo" autoplay muted></video>
+                <span class="name"></span>
+            </div>
+      
+            <div class="vid">
+                <video id="localDisplay" class="vid" autoplay muted></video>
+                <span class="name"></span>
+            </div>
         </div>
-        <div class="chat_wrap">
+        <div id="chat_wrap" class="chat_wrap">
             <div class="header">
                 CHAT
             </div>
@@ -66,6 +73,11 @@
 
                 <div class="content" id="displaybox" onclick="clickDisplay()" data-tooltip-text="화면 공유하기">
                     <i class="fas fa-external-link-alt"></i>
+                </div>
+
+                <div class="content" id="chatbox" onclick="toggleChat();" data-tooltip-text="채팅창 열기">
+                    <i id="chatbtn" class="far fa-comment"></i>
+                    <i id="chat-slash" class="fas fa-comment-slash"></i>
                 </div>
             </div>
         </div>

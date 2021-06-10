@@ -13,7 +13,7 @@ let peers = {}
 
 let displayStream = null;
 
-
+let check = {}
 // redirect if not https
 if (location.href.substr(0, 5) !== 'https')
     location.href = 'https' + location.href.substr(4, location.href.length - 4)
@@ -21,6 +21,8 @@ if (location.href.substr(0, 5) !== 'https')
 var clientId;
 var myName;
 var room;
+var videoAvailable = true;
+var audioAvailable = true;
 //////////// CONFIGURATION //////////////////
 
 /**
@@ -45,14 +47,7 @@ const configuration = {
  */
 let constraints = {
     audio: true,
-    video: {
-        width: {
-            max: 300
-        },
-        height: {
-            max: 300
-        }
-    }
+    video: true,
 }
 
 /////////////////////////////////////////////////////////
@@ -61,16 +56,107 @@ constraints.video.facingMode = {
     ideal: "user"
 }
 
+
 // enabling the camera at startup
-navigator.mediaDevices.getUserMedia(constraints).then(stream => {
-    console.log('Received local stream');
 
-    localVideo.srcObject = stream;
-    localStream = stream;
 
-    init()
+// navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+//     console.log('Received local stream');
 
-}).catch(e => alert(`getusermedia error ${e.name}`))
+//     localVideo.srcObject = stream;
+//     localStream = stream;
+//     init()
+
+// }).catch(e => init())
+
+navigator.mediaDevices.getUserMedia({ video: true })
+    .then(() => videoAvailable = true)
+    .catch(() => videoAvailable = false);
+
+
+navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(() => audioAvailable = true)
+    .catch(() => audioAvailable = false);
+
+if (videoAvailable || audioAvailable) {
+
+    navigator.mediaDevices.getUserMedia({ video: videoAvailable, audio: audioAvailable }).then(stream => {
+        console.log('Received local stream');
+
+        localVideo.srcObject = stream;
+        localStream = stream;
+        init()
+
+    }).catch(function (err) {
+        console.log(err); /* handle the error */
+        if (err.name == "NotFoundError" || err.name == "DevicesNotFoundError") {
+            //required track is missing 
+            if(videoAvailable){
+                navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then(stream => {
+                    console.log('Received local stream');
+            
+                    localVideo.srcObject = stream;
+                    localStream = stream;
+                    init()
+                    toggleMute();
+            
+                }).catch(function (err) {
+                    console.log(err);
+                })
+            }else if(audioAvailable) {
+                navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(stream => {
+                    console.log('Received local stream');
+            
+                    localVideo.srcObject = stream;
+                    localStream = stream;
+                    init()
+
+                    toggleVid();
+                }).catch(function (err) {
+                    console.log(err);
+                })
+            }else{
+                init();
+            }
+        } else if (err.name == "NotReadableError" || err.name == "TrackStartError") {
+            //webcam or mic are already in use 
+        } else if (err.name == "OverconstrainedError" || err.name == "ConstraintNotSatisfiedError") {
+            //constraints can not be satisfied by avb. devices 
+        } else if (err.name == "NotAllowedError" || err.name == "PermissionDeniedError") {
+            //permission denied in browser 
+            if(videoAvailable){
+                navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then(stream => {
+                    console.log('Received local stream');
+            
+                    localVideo.srcObject = stream;
+                    localStream = stream;
+                    init()
+                    toggleMute();
+            
+                }).catch(function (err) {
+                    console.log(err);
+                })
+            }else if(audioAvailable) {
+                navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(stream => {
+                    console.log('Received local stream');
+            
+                    localVideo.srcObject = stream;
+                    localStream = stream;
+                    init()
+
+                    toggleVid();
+                }).catch(function (err) {
+                    console.log(err);
+                })
+            }
+        } else if (err.name == "TypeError" || err.name == "TypeError") {
+            //empty constraints object 
+        } else {
+            //other errors 
+        }
+    })
+}
+
 
 /**
  * initialize the socket connections
@@ -80,7 +166,7 @@ function init() {
 
     socket.on('initReceive', socket_id => {
         console.log('INIT RECEIVE ' + socket_id)
-        addPeer(socket_id, false)
+        addPeer(socket_id,false)
 
         socket.emit('initSend', socket_id)
     })
@@ -114,7 +200,7 @@ function init() {
     // room = prompt('Enter room name:');
 
     if (room !== '') {
-        socket.emit('create or join', room);
+        socket.emit('create or join', (room));
         console.log('Attempted to create or  join room', room);
     }
 
@@ -136,15 +222,18 @@ function init() {
         console.log('joined: ' + room);
         clientId = id;
     });
+
     socket.on('receivechat', function (data) {
         receive(data);
     });
+
+    
 }
 
 /**
  * chatting ststem
  */
- window.onload = function(){
+window.onload = function () {
     myName = prompt("닉네임을 입력해주세요.", Math.random().toString(36).substr(2, 11));
     while (true) {
         if (myName === null || myName.trim() === "") {
@@ -154,6 +243,9 @@ function init() {
             break;
         }
     }
+    document.getElementById('localVideo').nextSibling.nextSibling.innerHTML=myName;
+
+    
 }
 // init 함수
 function chatInit() {
@@ -165,10 +257,14 @@ function chatInit() {
             e.preventDefault();
             const message = textarea.value;
 
-            // 메시지 전송
-            sendMessage(message);
             // 입력창 clear
             clearTextarea();
+
+            if(message.trim() === "") return;
+
+            // 메시지 전송
+            sendMessage(message);
+            
         }
     })
 }
@@ -198,6 +294,7 @@ function appendMessageTag(LR_className, senderName, message) {
 // 메세지 전송
 function sendMessage(message) {
     // 서버에 전송하는 코드로 후에 대체
+
     const data = {
         "room": room,
         "senderName": myName,
@@ -238,18 +335,19 @@ function removePeer(socket_id) {
 
     let videoEl = document.getElementById(socket_id)
     if (videoEl) {
-
-        const tracks = videoEl.srcObject.getTracks();
+        const tracks = videoEl.firstChild.srcObject.getTracks();
 
         tracks.forEach(function (track) {
             track.stop()
         })
 
-        videoEl.srcObject = null
+        videoEl.firstChild.srcObject = null
         videoEl.parentNode.removeChild(videoEl)
+        Dish();
     }
     if (peers[socket_id]) peers[socket_id].destroy()
     delete peers[socket_id]
+    delete check[socket_id]
 }
 
 /**
@@ -264,27 +362,46 @@ function addPeer(socket_id, am_initiator) {
     peers[socket_id] = new SimplePeer({
         initiator: am_initiator,
         stream: localStream,
-        config: configuration
+        config: configuration,
     })
 
     peers[socket_id].on('signal', data => {
         socket.emit('signal', {
             signal: data,
-            socket_id: socket_id
+            socket_id: socket_id,
         })
     })
 
     peers[socket_id].on('stream', stream => {
+        let newDiv = document.createElement('div')
+        newDiv.className = "vid"
+        newDiv.id = socket_id
+
+        let newSpan = document.createElement('span')
+        newSpan.className = "name"
+
         let newVid = document.createElement('video')
         newVid.srcObject = stream
-        newVid.id = socket_id
         newVid.playsinline = false
         newVid.autoplay = true
-        newVid.className = "vid"
         newVid.onclick = () => openPictureMode(newVid)
         newVid.ontouchstart = (e) => openPictureMode(newVid)
-        videos.appendChild(newVid)
+        newDiv.appendChild(newVid)
+        newDiv.appendChild(newSpan)
+        videos.appendChild(newDiv)
+        Dish();
+
+        socket.emit('sendname', {to:socket_id, from:clientId, name: myName})
+        socket.on('sendname', function(data){
+            var nameSpan = document.getElementById(data.from).lastChild;
+            nameSpan.innerHTML= data.name;
+            if(!check[data.from]){
+                check[data.from] = {check: true};
+                socket.emit('sendname',{to:data.from, from:clientId, name: myName})
+            }
+        })
     })
+
 }
 function addDisplay(socket_id, am_initiator) {
     peers[socket_id] = new SimplePeer({
@@ -407,6 +524,8 @@ function removeLocalStream() {
  * Enable/disable microphone
  */
 function toggleMute() {
+    if(!audioAvailable){return}
+
     var micbtn = document.getElementById("micbtn");
     var micbtnSlash = document.getElementById("micbtn-slash");
     var micbox = document.getElementById("micbox");
@@ -430,6 +549,7 @@ function toggleMute() {
  * Enable/disable video
  */
 function toggleVid() {
+    if(!videoAvailable){return}
     var videobtn = document.getElementById("videobtn");
     var videobox = document.getElementById("videobox");
     var videoSlash = document.getElementById("video-slash");
@@ -449,6 +569,41 @@ function toggleVid() {
         videobox.style.backgroundColor = "#d93025";
     }
 }
+
+function toggleChat() {
+    var chatbtn = document.getElementById("chatbtn");
+    var chatSlash = document.getElementById("chat-slash");
+    var chatbox = document.getElementById("chatbox");
+
+    if(chatbtn.style.display === "none"){
+        chatbtn.style.display = "inline-block";
+        chatSlash.style.display = "none";
+        chatbox.style.backgroundColor = "#FFFFFF";
+    }else{
+        chatbtn.style.display = "none";
+        chatSlash.style.display = "inline-block";
+        chatbox.style.backgroundColor = "#d93025";
+    }
+
+    var chat_wrap = document.getElementById("chat_wrap");
+    var videos = document.getElementById("videos");
+    if(chat_wrap.className === "chat_wrap"){
+        chat_wrap.className = "chat_wrap chat_off";
+        videos.className = "video_chatoff";
+    }else{
+        chat_wrap.className = "chat_wrap";
+        videos.className = "";
+    }
+}
+
+while(isOverflown(document.getElementById('videos'))){
+    console.log('here');
+    Dish();
+}
+
+function isOverflown(element) {
+    return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
+  }
 
 /**
  * updating text of buttons
@@ -494,5 +649,67 @@ function copyToClipboard(val) {
     t.select();
     document.execCommand('copy');
     document.body.removeChild(t);
-  }
+}
 
+
+
+
+///////////////////////////////////////////////////////////////////////
+
+// Area:
+function Area(Increment, Count, Width, Height, Margin = 10) {
+    let i = w = 0;
+    let h = Increment * 0.75 + (Margin * 2);
+    while (i < (Count)) {
+        if ((w + Increment) > Width) {
+            w = 0;
+            h = h + (Increment * 0.75) + (Margin * 2);
+        }
+        w = w + Increment + (Margin * 2);
+        i++;
+    }
+    if (h > Height) return false;
+    else return Increment;
+}
+// Dish:
+function Dish() {
+
+    // variables:
+    let Margin = 2;
+    let Scenary = document.getElementById('videos');
+    let Width = Scenary.offsetWidth - (Margin * 2);
+    let Height = Scenary.offsetHeight - (Margin * 2);
+    let Cameras = document.getElementsByClassName('vid');
+    let max = 0;
+
+    // loop (i recommend you optimize this)
+    let i = 1;
+    while (i < 5000) {
+        let w = Area(i, Cameras.length, Width, Height, Margin);
+        if (w === false) {
+            max = i - 1;
+            break;
+        }
+        i++;
+    }
+
+    // set styles
+    max = max - (Margin * 2);
+    setWidth(max, Margin);
+}
+
+// Set Width and Margin 
+function setWidth(width, margin) {
+    let Cameras = document.getElementsByClassName('vid');
+    for (var s = 0; s < Cameras.length; s++) {
+        Cameras[s].style.width = width + "px";
+        Cameras[s].style.margin = margin + "px";
+        Cameras[s].style.height = (width * 0.75) + "px";
+    }
+}
+
+// Load and Resize Event
+window.addEventListener("load", function (event) {
+    Dish();
+    window.onresize = Dish;
+}, false);
