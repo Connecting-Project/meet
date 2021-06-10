@@ -11,6 +11,7 @@ let localStream = null;
  */
 let peers = {}
 
+let check = {}
 // redirect if not https
 if (location.href.substr(0, 5) !== 'https')
     location.href = 'https' + location.href.substr(4, location.href.length - 4)
@@ -76,8 +77,6 @@ navigator.mediaDevices.getUserMedia({ audio: true })
     .catch(() => audioAvailable = false);
 
 if (videoAvailable || audioAvailable) {
-    console.log(videoAvailable);
-    console.log(audioAvailable);
 
     navigator.mediaDevices.getUserMedia({ video: videoAvailable, audio: audioAvailable }).then(stream => {
         console.log('Received local stream');
@@ -90,6 +89,33 @@ if (videoAvailable || audioAvailable) {
         console.log(err); /* handle the error */
         if (err.name == "NotFoundError" || err.name == "DevicesNotFoundError") {
             //required track is missing 
+            if(videoAvailable){
+                navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then(stream => {
+                    console.log('Received local stream');
+            
+                    localVideo.srcObject = stream;
+                    localStream = stream;
+                    init()
+                    toggleMute();
+            
+                }).catch(function (err) {
+                    console.log(err);
+                })
+            }else if(audioAvailable) {
+                navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(stream => {
+                    console.log('Received local stream');
+            
+                    localVideo.srcObject = stream;
+                    localStream = stream;
+                    init()
+
+                    toggleVid();
+                }).catch(function (err) {
+                    console.log(err);
+                })
+            }else{
+                init();
+            }
         } else if (err.name == "NotReadableError" || err.name == "TrackStartError") {
             //webcam or mic are already in use 
         } else if (err.name == "OverconstrainedError" || err.name == "ConstraintNotSatisfiedError") {
@@ -108,7 +134,7 @@ if (videoAvailable || audioAvailable) {
                 }).catch(function (err) {
                     console.log(err);
                 })
-            }else {
+            }else if(audioAvailable) {
                 navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(stream => {
                     console.log('Received local stream');
             
@@ -199,6 +225,7 @@ function init() {
         receive(data);
     });
 
+    
 }
 
 /**
@@ -214,7 +241,9 @@ window.onload = function () {
             break;
         }
     }
+    document.getElementById('localVideo').nextSibling.nextSibling.innerHTML=myName;
 
+    
 }
 // init 함수
 function chatInit() {
@@ -316,6 +345,7 @@ function removePeer(socket_id) {
     }
     if (peers[socket_id]) peers[socket_id].destroy()
     delete peers[socket_id]
+    delete check[socket_id]
 }
 
 /**
@@ -340,24 +370,13 @@ function addPeer(socket_id, am_initiator) {
         })
     })
 
-    // peers[socket_id].on('stream', stream => {
-    //     let newVid = document.createElement('video')
-        
-    //     newVid.srcObject = stream
-    //     newVid.id = socket_id
-    //     newVid.playsinline = false
-    //     newVid.autoplay = true
-    //     newVid.className = "vid"
-    //     newVid.onclick = () => openPictureMode(newVid)
-    //     newVid.ontouchstart = (e) => openPictureMode(newVid)
-    //     videos.appendChild(newVid)
-    //     Dish();
-    // })
-
     peers[socket_id].on('stream', stream => {
         let newDiv = document.createElement('div')
         newDiv.className = "vid"
         newDiv.id = socket_id
+
+        let newSpan = document.createElement('span')
+        newSpan.className = "name"
 
         let newVid = document.createElement('video')
         newVid.srcObject = stream
@@ -366,9 +385,21 @@ function addPeer(socket_id, am_initiator) {
         newVid.onclick = () => openPictureMode(newVid)
         newVid.ontouchstart = (e) => openPictureMode(newVid)
         newDiv.appendChild(newVid)
+        newDiv.appendChild(newSpan)
         videos.appendChild(newDiv)
         Dish();
+
+        socket.emit('sendname', {to:socket_id, from:clientId, name: myName})
+        socket.on('sendname', function(data){
+            var nameSpan = document.getElementById(data.from).lastChild;
+            nameSpan.innerHTML= data.name;
+            if(!check[data.from]){
+                check[data.from] = {check: true};
+                socket.emit('sendname',{to:data.from, from:clientId, name: myName})
+            }
+        })
     })
+
 }
 
 /**
@@ -535,8 +566,17 @@ function toggleChat() {
         chat_wrap.className = "chat_wrap";
         videos.className = "";
     }
-
 }
+
+while(isOverflown(document.getElementById('videos'))){
+    console.log('here');
+    Dish();
+}
+
+function isOverflown(element) {
+    return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
+  }
+
 /**
  * updating text of buttons
  */

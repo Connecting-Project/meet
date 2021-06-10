@@ -71,7 +71,11 @@ module.exports = (io) => {
 
         socket.on('sendchat',function(data){
             io.sockets.in(data.room).emit('receivechat', data)
-          });
+        });
+
+        socket.on('sendname', (data) => {
+            peers[data.to].emit('sendname' , data)
+        })
 
     })
 }
