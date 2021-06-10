@@ -11,6 +11,8 @@ let localStream = null;
  */
 let peers = {}
 
+let displayStream = null;
+
 let check = {}
 // redirect if not https
 if (location.href.substr(0, 5) !== 'https')
@@ -401,6 +403,32 @@ function addPeer(socket_id, am_initiator) {
     })
 
 }
+function addDisplay(socket_id, am_initiator) {
+    peers[socket_id] = new SimplePeer({
+        initiator: am_initiator,
+        stream: displayStream,
+        config: configuration
+    })
+
+    peers[socket_id].on('signal', data => {
+        socket.emit('signal', {
+            signal: data,
+            socket_id: socket_id
+        })
+    })
+
+    peers[socket_id].on('stream', stream => {
+        let newVid = document.createElement('video')
+        newVid.srcObject = stream
+        newVid.id = socket_id
+        newVid.playsinline = false
+        newVid.autoplay = true
+        newVid.className = "vid"
+        newVid.onclick = () => openPictureMode(newVid)
+        newVid.ontouchstart = (e) => openPictureMode(newVid)
+        videos.appendChild(newVid)
+    })
+}
 
 /**
  * Opens an element in Picture-in-Picture mode
@@ -588,6 +616,26 @@ function updateButtons() {
         muteButton.innerText = localStream.getAudioTracks()[index].enabled ? "Unmuted" : "Muted"
     }
 }
+
+function clickDisplay() {
+  
+   navigator.mediaDevices.getDisplayMedia({
+       audio: true,
+       video: true
+   }).then(function(stream){
+     console.log('Adding Display stream.');
+     localDisplay.srcObject = stream;
+     displayStream = stream;
+     console.log(displayStream);
+     init();
+     sendMessage('got user media');
+     console.log(peers)
+   }).catch(function(e){
+     alert('getDisplayMedia() error: '+ e.name)
+       //error;
+   });
+   
+   }
 
 function copylink() {
     copyToClipboard(window.document.location.href);

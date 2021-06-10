@@ -16,6 +16,11 @@
                 <video id="localVideo" autoplay muted></video>
                 <span class="name"></span>
             </div>
+      
+            <div class="vid">
+                <video id="localDisplay" class="vid" autoplay muted></video>
+                <span class="name"></span>
+            </div>
         </div>
         <div id="chat_wrap" class="chat_wrap">
             <div class="header">
@@ -66,7 +71,7 @@
                     <i id="video-slash" class="fas fa-video-slash"></i>
                 </div>
 
-                <div class="content" id="displaybox" onclick="" data-tooltip-text="화면 공유하기">
+                <div class="content" id="displaybox" onclick="clickDisplay()" data-tooltip-text="화면 공유하기">
                     <i class="fas fa-external-link-alt"></i>
                 </div>
 
