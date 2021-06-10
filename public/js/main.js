@@ -85,7 +85,7 @@ if (videoAvailable || audioAvailable) {
 
         localVideo.srcObject = stream;
         localStream = stream;
-        init()
+        init(localStream)
 
     }).catch(function (err) {
         console.log(err); /* handle the error */
@@ -97,7 +97,7 @@ if (videoAvailable || audioAvailable) {
             
                     localVideo.srcObject = stream;
                     localStream = stream;
-                    init()
+                    init(localStream)
                     toggleMute();
             
                 }).catch(function (err) {
@@ -109,14 +109,14 @@ if (videoAvailable || audioAvailable) {
             
                     localVideo.srcObject = stream;
                     localStream = stream;
-                    init()
+                    init(localStream,localVideo)
 
                     toggleVid();
                 }).catch(function (err) {
                     console.log(err);
                 })
             }else{
-                init();
+                init(localStream);
             }
         } else if (err.name == "NotReadableError" || err.name == "TrackStartError") {
             //webcam or mic are already in use 
@@ -130,7 +130,7 @@ if (videoAvailable || audioAvailable) {
             
                     localVideo.srcObject = stream;
                     localStream = stream;
-                    init()
+                    init(localStream)
                     toggleMute();
             
                 }).catch(function (err) {
@@ -142,7 +142,7 @@ if (videoAvailable || audioAvailable) {
             
                     localVideo.srcObject = stream;
                     localStream = stream;
-                    init()
+                    init(localStream)
 
                     toggleVid();
                 }).catch(function (err) {
@@ -161,19 +161,19 @@ if (videoAvailable || audioAvailable) {
 /**
  * initialize the socket connections
  */
-function init() {
+function init(stream) {
     socket = io()
 
     socket.on('initReceive', socket_id => {
         console.log('INIT RECEIVE ' + socket_id)
-        addPeer(socket_id,false)
+        addPeer(socket_id,false,stream)
 
         socket.emit('initSend', socket_id)
     })
 
     socket.on('initSend', socket_id => {
         console.log('INIT SEND ' + socket_id)
-        addPeer(socket_id, true)
+        addPeer(socket_id,true,stream)
     })
 
     socket.on('removePeer', socket_id => {
@@ -358,25 +358,25 @@ function removePeer(socket_id) {
  *                  Set to true if the peer initiates the connection process.
  *                  Set to false if the peer receives the connection. 
  */
-function addPeer(socket_id, am_initiator) {
+function addPeer(socket_id, am_initiator,stream1) {
     peers[socket_id] = new SimplePeer({
         initiator: am_initiator,
-        stream: localStream,
+        stream: stream1,
         config: configuration,
     })
-
     peers[socket_id].on('signal', data => {
+        
         socket.emit('signal', {
             signal: data,
             socket_id: socket_id,
         })
+        console.log("addpeer333")
     })
-
     peers[socket_id].on('stream', stream => {
         let newDiv = document.createElement('div')
         newDiv.className = "vid"
         newDiv.id = socket_id
-
+        console.log("in new div")
         let newSpan = document.createElement('span')
         newSpan.className = "name"
 
@@ -627,7 +627,9 @@ function clickDisplay() {
      localDisplay.srcObject = stream;
      displayStream = stream;
      console.log(displayStream);
-     init();
+     init(displayStream)
+
+
      sendMessage('got user media');
      console.log(peers)
    }).catch(function(e){
