@@ -6,6 +6,7 @@ let socket;
  * The stream object used to send media
  */
 let localStream = null;
+let displayStream = null;
 /**
  * All peer connections
  */
@@ -155,16 +156,15 @@ if (videoAvailable || audioAvailable) {
     })
 }
 
-
 /**
  * initialize the socket connections
  */
 function init() {
     socket = io()
 
-    socket.on('initReceive', socket_id => {
+    socket.on('initReceive', (socket_id) => {
         console.log('INIT RECEIVE ' + socket_id)
-        addPeer(socket_id,false)
+        addPeer(socket_id, false)
 
         socket.emit('initSend', socket_id)
     })
@@ -198,7 +198,7 @@ function init() {
     // room = prompt('Enter room name:');
 
     if (room !== '') {
-        socket.emit('create or join', (room));
+        socket.emit('create or join', room , true);
         console.log('Attempted to create or  join room', room);
     }
 
@@ -225,6 +225,7 @@ function init() {
         receive(data);
     });
 
+    
     
 }
 
@@ -357,27 +358,25 @@ function removePeer(socket_id) {
  *                  Set to false if the peer receives the connection. 
  */
 function addPeer(socket_id, am_initiator) {
+
     peers[socket_id] = new SimplePeer({
         initiator: am_initiator,
         stream: localStream,
         config: configuration,
     })
-
+    
     peers[socket_id].on('signal', data => {
         socket.emit('signal', {
             signal: data,
             socket_id: socket_id,
         })
     })
-
+    
     peers[socket_id].on('stream', stream => {
         let newDiv = document.createElement('div')
         newDiv.className = "vid"
         newDiv.id = socket_id
-
-        let newSpan = document.createElement('span')
-        newSpan.className = "name"
-
+        
         let newVid = document.createElement('video')
         newVid.srcObject = stream
         newVid.playsinline = false
@@ -385,7 +384,12 @@ function addPeer(socket_id, am_initiator) {
         newVid.onclick = () => openPictureMode(newVid)
         newVid.ontouchstart = (e) => openPictureMode(newVid)
         newDiv.appendChild(newVid)
+
+        let newSpan = document.createElement('span')
+        newSpan.className = "name"
         newDiv.appendChild(newSpan)
+        
+
         videos.appendChild(newDiv)
         Dish();
 
@@ -398,6 +402,17 @@ function addPeer(socket_id, am_initiator) {
                 socket.emit('sendname',{to:data.from, from:clientId, name: myName})
             }
         })
+
+        socket.on('receiveNotReverse', function (id) {
+            document.getElementById(id).firstChild.className = "vid";
+        })
+        
+        socket.on('receiveReverse', function (id) {
+            document.getElementById(id).firstChild.className = "vid reverse";
+        })
+
+        socket.emit('isReverse', {to: socket_id, from: clientId});
+        
     })
 
 }
@@ -566,6 +581,32 @@ function toggleChat() {
         chat_wrap.className = "chat_wrap";
         videos.className = "";
     }
+}
+
+function toggleReverse(){
+    var myVideo = document.getElementById('localVideo');
+
+    if(myVideo.className === "vid reverse"){
+        myVideo.className = "vid";
+        socket.emit('notReverse', {room:room, id:clientId});
+    }else{
+        myVideo.className = "vid reverse";
+        socket.emit('reverse', {room:room, id:clientId});
+    }
+
+}
+
+function toggleDisplay(){
+    navigator.mediaDevices.getDisplayMedia({video: true}).then((stream)=>{
+
+        displayStream = stream;
+    
+        var displaysocket = io();
+        displaysocket.emit('create or join', room);
+ 
+    }).catch((error)=>{
+        console.log(error);
+    })
 }
 
 while(isOverflown(document.getElementById('videos'))){

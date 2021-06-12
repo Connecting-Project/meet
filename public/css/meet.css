@@ -59,6 +59,15 @@ html,body{
     display: none;
 }
 
+#not-video-reverse{
+    display: none;
+}
+
+.reverse{
+    transform: rotateY(180deg);
+    -webkit-transform:rotateY(180deg);
+    -moz-transform:rotateY(180deg);
+}
 /* #videos {
 
     float: left;
@@ -89,6 +98,8 @@ html,body{
 .video_chatoff {
     right: 0px !important;
 }
+
+
 /* Camera */
 /* #videos video {
 
