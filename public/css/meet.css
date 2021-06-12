@@ -1,9 +1,7 @@
 .meet-container{
     height: 100%;
-}
-
-.meet-container{
     background-color: #6f7075;
+    overflow: hidden;
 }
 
 html,body{
@@ -57,6 +55,19 @@ html,body{
     color: #d93025;
 }
 
+#chat-slash{
+    display: none;
+}
+
+#not-video-reverse{
+    display: none;
+}
+
+.reverse{
+    transform: rotateY(180deg);
+    -webkit-transform:rotateY(180deg);
+    -moz-transform:rotateY(180deg);
+}
 /* #videos {
 
     float: left;
@@ -81,9 +92,16 @@ html,body{
     bottom: 107px;
     top: 0px;
     right: 400px;
+    transition: all ease 1s 0s;
 }
+
+.video_chatoff {
+    right: 0px !important;
+}
+
+
 /* Camera */
-#videos video {
+/* #videos video {
 
     position: relative;
     vertical-align: middle;
@@ -93,10 +111,10 @@ html,body{
     display: inline-block;
     animation: show 0.4s ease;
     background-color: #222;
-}
+} */
 /* Details (optional) */
 /* Aspect Ratio Number */
-    #videos video:after {
+    /* #videos video:after {
         color: #aaa;
         font-size: 13px;
         font-family: Arial, Helvetica, sans-serif;
@@ -106,9 +124,9 @@ html,body{
         font-weight: 100;
         content: "4:3";
         display: block;
-    }
+    } */
 /* Gray Diagonal */
-    #videos video:before {
+    /* #videos video:before {
         position: absolute;
         height: 1px;
         background: #ddd;
@@ -119,7 +137,30 @@ html,body{
         content: "4:3";
         display: block;
         ;
-    }
+    } */
+
+#videos .vid {
+    position: relative;
+    vertical-align: middle;
+    align-self: center;
+    border-radius: 10px;
+    overflow: hidden;
+    animation: show 0.4s ease;
+    background-color: #222;
+    display: flex;
+    align-items: center;
+}
+
+video {width: 100%;}
+.name {position: absolute;
+    left: 5px;
+    bottom: 5px;
+    padding: 5px;
+    background: white;
+    border-radius: 5px;
+    height: 10px;
+    line-height: 8px;
+    font-weight: 600;}
 /* Animation */
 @keyframes show {
     0% {
@@ -134,7 +175,7 @@ html,body{
 
 *{ margin: 0; padding: 0;}
  
-.chat_wrap {height: 100%; display: flex; flex-direction: column; float: right; width: 400px; }
+.chat_wrap {height: -webkit-calc(100% - 107px); display: flex; flex-direction: column; float: right; width: 400px; transition: all ease 1s 0s;}
 .chat_wrap .header { font-size: 14px; padding: 15px 0; background: #F18C7E; color: white; text-align: center;  }
  
 .chat_wrap .chat { padding-bottom: 30px; flex: 1; background-color: #FFFFFF; overflow-y: scroll;}
@@ -173,3 +214,6 @@ html,body{
 }
 
 
+.chat_off{
+    margin-right: -400px;
+}
