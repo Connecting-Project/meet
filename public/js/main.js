@@ -404,11 +404,11 @@
          })
  
          socket.on('receiveNotReverse', function (id) {
-             document.getElementById(id).firstChild.className = "vid";
+             document.getElementById(id).firstChild.className = "";
          })
          
          socket.on('receiveReverse', function (id) {
-             document.getElementById(id).firstChild.className = "vid reverse";
+             document.getElementById(id).firstChild.className = "reverse";
          })
  
          socket.emit('isReverse', {to: socket_id, from: clientId});
@@ -586,11 +586,11 @@
  function toggleReverse(){
      var myVideo = document.getElementById('localVideo');
  
-     if(myVideo.className === "vid reverse"){
-         myVideo.className = "vid";
+     if(myVideo.className === "reverse"){
+         myVideo.className = "";
          socket.emit('notReverse', {room:room, id:clientId});
      }else{
-         myVideo.className = "vid reverse";
+         myVideo.className = "reverse";
          socket.emit('reverse', {room:room, id:clientId});
      }
  
