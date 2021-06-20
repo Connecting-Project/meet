@@ -459,7 +459,6 @@
          localStream = stream
          localVideo.srcObject = stream
  
-         updateButtons()
      })
  }
  
@@ -482,9 +481,26 @@
          localStream = stream
  
          localVideo.srcObject = localStream
-         socket.emit('removeUpdatePeer', '')
+
+         localStream.getVideoTracks()[0].addEventListener('ended', () => {
+            navigator.mediaDevices.getUserMedia({video: videoAvailable, audio: audioAvailable}).then(stream => {
+                for (let socket_id in peers) {
+                    for (let index in peers[socket_id].streams[0].getTracks()) {
+                        for (let index2 in stream.getTracks()) {
+                            if (peers[socket_id].streams[0].getTracks()[index].kind === stream.getTracks()[index2].kind) {
+                                peers[socket_id].replaceTrack(peers[socket_id].streams[0].getTracks()[index], stream.getTracks()[index2], peers[socket_id].streams[0])
+                                break;
+                            }
+                        }
+                    }
+                }
+        
+                localStream = stream
+                localVideo.srcObject = stream
+        
+            })
+         })
      })
-     updateButtons()
  }
  
  /**
@@ -505,7 +521,7 @@
          removePeer(socket_id)
      }
      location.href = "/";
- }
+}
  
  /**
   * Enable/disable microphone
@@ -529,8 +545,6 @@
          micbtnSlash.style.color = "#FFFFFF";
          micbox.style.backgroundColor = "#d93025";
      }
- 
- 
  }
  /**
   * Enable/disable video
@@ -597,16 +611,9 @@
  }
  
  function toggleDisplay(){
-     navigator.mediaDevices.getDisplayMedia({video: true}).then((stream)=>{
- 
-         displayStream = stream;
-     
-         var displaysocket = io();
-         displaysocket.emit('create or join', room);
-  
-     }).catch((error)=>{
-         console.log(error);
-     })
+
+    setScreen();
+    console.log(localStream);
  }
  
  while(isOverflown(document.getElementById('videos'))){
@@ -621,15 +628,7 @@
  /**
   * updating text of buttons
   */
- function updateButtons() {
-     for (let index in localStream.getVideoTracks()) {
-         vidButton.innerText = localStream.getVideoTracks()[index].enabled ? "Video Enabled" : "Video Disabled"
-     }
-     for (let index in localStream.getAudioTracks()) {
-         muteButton.innerText = localStream.getAudioTracks()[index].enabled ? "Unmuted" : "Muted"
-     }
- }
- 
+
  function copylink() {
      copyToClipboard(window.document.location.href);
      alert("회의 링크가 복사되었습니다.");
