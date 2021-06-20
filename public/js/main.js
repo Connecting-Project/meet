@@ -403,32 +403,6 @@ function addPeer(socket_id, am_initiator,stream1) {
     })
 
 }
-function addDisplay(socket_id, am_initiator) {
-    peers[socket_id] = new SimplePeer({
-        initiator: am_initiator,
-        stream: displayStream,
-        config: configuration
-    })
-
-    peers[socket_id].on('signal', data => {
-        socket.emit('signal', {
-            signal: data,
-            socket_id: socket_id
-        })
-    })
-
-    peers[socket_id].on('stream', stream => {
-        let newVid = document.createElement('video')
-        newVid.srcObject = stream
-        newVid.id = socket_id
-        newVid.playsinline = false
-        newVid.autoplay = true
-        newVid.className = "vid"
-        newVid.onclick = () => openPictureMode(newVid)
-        newVid.ontouchstart = (e) => openPictureMode(newVid)
-        videos.appendChild(newVid)
-    })
-}
 
 /**
  * Opens an element in Picture-in-Picture mode
@@ -479,7 +453,7 @@ function switchMedia() {
 /**
  * Enable screen share
  */
-function setScreen() {
+ function setScreen() {
     navigator.mediaDevices.getDisplayMedia().then(stream => {
         for (let socket_id in peers) {
             for (let index in peers[socket_id].streams[0].getTracks()) {
@@ -490,14 +464,26 @@ function setScreen() {
                     }
                 }
             }
-
         }
         localStream = stream
-
         localVideo.srcObject = localStream
-        socket.emit('removeUpdatePeer', '')
+        localStream.getVideoTracks()[0].addEventListener('ended', () => {
+           navigator.mediaDevices.getUserMedia({video: videoAvailable, audio: audioAvailable}).then(stream => {
+               for (let socket_id in peers) {
+                   for (let index in peers[socket_id].streams[0].getTracks()) {
+                       for (let index2 in stream.getTracks()) {
+                           if (peers[socket_id].streams[0].getTracks()[index].kind === stream.getTracks()[index2].kind) {
+                               peers[socket_id].replaceTrack(peers[socket_id].streams[0].getTracks()[index], stream.getTracks()[index2], peers[socket_id].streams[0])
+                               break;
+                           }
+                       }
+                   }
+               }
+               localStream = stream
+               localVideo.srcObject = stream
+           })
+        })
     })
-    updateButtons()
 }
 
 /**
@@ -618,24 +604,22 @@ function updateButtons() {
 }
 
 function clickDisplay() {
+    setScreen();
+//    navigator.mediaDevices.getDisplayMedia({
+//        audio: true,
+//        video: true
+//    }).then(function(stream){
+//      console.log('Adding Display stream.');
+//      localVideo.srcObject = stream;
+//      localStream = stream;
+//      init(stream)
   
-   navigator.mediaDevices.getDisplayMedia({
-       audio: true,
-       video: true
-   }).then(function(stream){
-     console.log('Adding Display stream.');
-     localDisplay.srcObject = stream;
-     displayStream = stream;
-     console.log(displayStream);
-     init(displayStream)
-
-
-     sendMessage('got user media');
-     console.log(peers)
-   }).catch(function(e){
-     alert('getDisplayMedia() error: '+ e.name)
-       //error;
-   });
+//      sendMessage('got user media');
+//      console.log(peers)
+//    }).catch(function(e){
+//      alert('getDisplayMedia() error: '+ e.name)
+//        //error;
+//    });
    
    }
 
