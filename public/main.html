@@ -16,11 +16,6 @@
                 <video id="localVideo" autoplay muted></video>
                 <span class="name"></span>
             </div>
-      
-            <div class="vid">
-                <video id="localDisplay" class="vid" autoplay muted></video>
-                <span class="name"></span>
-            </div>
         </div>
         <div id="chat_wrap" class="chat_wrap">
             <div class="header">
@@ -71,7 +66,7 @@
                     <i id="video-slash" class="fas fa-video-slash"></i>
                 </div>
 
-                <div class="content" id="displaybox" onclick="clickDisplay()" data-tooltip-text="화면 공유하기">
+                <div class="content" id="displaybox" onclick="toggleDisplay();" data-tooltip-text="화면 공유하기">
                     <i class="fas fa-external-link-alt"></i>
                 </div>
 
@@ -79,11 +74,17 @@
                     <i id="chatbtn" class="far fa-comment"></i>
                     <i id="chat-slash" class="fas fa-comment-slash"></i>
                 </div>
+
+                <div class="content" id="chatbox" onclick="toggleReverse();" data-tooltip-text="화면 반전">
+                    <i id="video-reverse" class="fas fa-exchange-alt"></i>
+                    <i id="not-video-reverse" class="fas fa-undo"></i>
+                </div>
             </div>
         </div>
     </div>
     
     <script src='/js/main.js' lang="text/javascript"></script>
+
     <script src="https://use.fontawesome.com/releases/v5.2.0/js/all.js"></script>
 </body>
 </html>

@@ -11,7 +11,7 @@ module.exports = (io) => {
             var numClients = clientsInRoom ? Object.keys(clientsInRoom.sockets).length : 0;
             console.log('Room ' + room + ' now has ' + numClients + ' client(s)');
             peers[socket.id] = socket
-
+            peers[socket.id].reverse = false;
             if (numClients === 0) {
                 socket.join(room);
                 console.log('Client ID ' + socket.id + ' created room ' + room);
@@ -35,9 +35,7 @@ module.exports = (io) => {
                 
             }
         });
-
-
-
+        
         /**
          * relay a peerconnection signal to a specific socket
          */
@@ -77,5 +75,23 @@ module.exports = (io) => {
             peers[data.to].emit('sendname' , data)
         })
 
+        
+        socket.on('notReverse', (data)=>{
+            peers[socket.id].reverse = false;
+            socket.broadcast.emit('receiveNotReverse', data.id)
+        });
+    
+        socket.on('reverse', (data)=>{
+            peers[socket.id].reverse = true;
+            socket.broadcast.emit('receiveReverse', data.id)
+        });
+        
+        socket.on('isReverse', (data)=>{
+            if(peers[data.to].reverse){
+                peers[data.from].emit('receiveReverse', data.to);
+            }else{
+                peers[data.from].emit('receiveNotReverse', data.to);
+            }
+        })
     })
 }
