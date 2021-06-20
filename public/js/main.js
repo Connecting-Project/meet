@@ -984,31 +984,47 @@ function removePeer(socket_id) {
 function addPeer(socket_id, am_initiator) {
     peers[socket_id] = new SimplePeer({
         initiator: am_initiator,
-        stream: localStream,
-        config: configuration
+        stream: stream1,
+        config: configuration,
     })
-
     peers[socket_id].on('signal', data => {
+        
         socket.emit('signal', {
             signal: data,
-            socket_id: socket_id
+            socket_id: socket_id,
+        })
+        console.log("addpeer333")
+    })
+    peers[socket_id].on('stream', stream => {
+        let newDiv = document.createElement('div')
+        newDiv.className = "vid"
+        newDiv.id = socket_id
+        console.log("in new div")
+        let newSpan = document.createElement('span')
+        newSpan.className = "name"
+
+        let newVid = document.createElement('video')
+        newVid.srcObject = stream
+        newVid.playsinline = false
+        newVid.autoplay = true
+        newVid.onclick = () => openPictureMode(newVid)
+        newVid.ontouchstart = (e) => openPictureMode(newVid)
+        newDiv.appendChild(newVid)
+        newDiv.appendChild(newSpan)
+        videos.appendChild(newDiv)
+        Dish();
+
+        socket.emit('sendname', {to:socket_id, from:clientId, name: myName})
+        socket.on('sendname', function(data){
+            var nameSpan = document.getElementById(data.from).lastChild;
+            nameSpan.innerHTML= data.name;
+            if(!check[data.from]){
+                check[data.from] = {check: true};
+                socket.emit('sendname',{to:data.from, from:clientId, name: myName})
+            }
         })
     })
 
-    peers[socket_id].on('stream', stream => {
-        let newVid = document.createElement('video')
-        newVid.srcObject = stream
-        newVid.id = socket_id
-        newVid.playsinline = false
-        newVid.autoplay = true
-        newVid.className = "vid"
-        newVid.onclick = () => openPictureMode(newVid)
-        newVid.ontouchstart = (e) => openPictureMode(newVid)
-        videos.appendChild(newVid)
-        Dish();
-    })
-
-    
 }
 
 /**
@@ -1060,7 +1076,7 @@ function switchMedia() {
 /**
  * Enable screen share
  */
-function setScreen() {
+ function setScreen() {
     navigator.mediaDevices.getDisplayMedia().then(stream => {
         for (let socket_id in peers) {
             for (let index in peers[socket_id].streams[0].getTracks()) {
@@ -1071,14 +1087,26 @@ function setScreen() {
                     }
                 }
             }
-
         }
         localStream = stream
-
         localVideo.srcObject = localStream
-        socket.emit('removeUpdatePeer', '')
+        localStream.getVideoTracks()[0].addEventListener('ended', () => {
+           navigator.mediaDevices.getUserMedia({video: videoAvailable, audio: audioAvailable}).then(stream => {
+               for (let socket_id in peers) {
+                   for (let index in peers[socket_id].streams[0].getTracks()) {
+                       for (let index2 in stream.getTracks()) {
+                           if (peers[socket_id].streams[0].getTracks()[index].kind === stream.getTracks()[index2].kind) {
+                               peers[socket_id].replaceTrack(peers[socket_id].streams[0].getTracks()[index], stream.getTracks()[index2], peers[socket_id].streams[0])
+                               break;
+                           }
+                       }
+                   }
+               }
+               localStream = stream
+               localVideo.srcObject = stream
+           })
+        })
     })
-    updateButtons()
 }
 
 /**
@@ -1159,6 +1187,9 @@ function updateButtons() {
         muteButton.innerText = localStream.getAudioTracks()[index].enabled ? "Unmuted" : "Muted"
     }
 }
+function clickDisplay() {
+    setScreen();
+   }
 
 function copylink() {
     copyToClipboard(window.document.location.href);
