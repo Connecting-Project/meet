@@ -468,7 +468,13 @@ function switchMedia() {
  * Enable screen share
  */
 function setScreen() {
+    if(!videoAvailable){
+        alert('카메라 권한이 필요한 기능입니다.');
+        return;
+    }
+
     navigator.mediaDevices.getDisplayMedia().then(stream => {
+
         for (let socket_id in peers) {
             for (let index in peers[socket_id].streams[0].getTracks()) {
                 for (let index2 in stream.getTracks()) {
@@ -478,8 +484,8 @@ function setScreen() {
                     }
                 }
             }
-
         }
+
         localStream = stream
         localVideo.srcObject = localStream
 
@@ -544,7 +550,9 @@ function removeLocalStream() {
  * Enable/disable microphone
  */
 function toggleMute() {
-    if (!audioAvailable) { return }
+    if (!audioAvailable) {
+        return; 
+    }
 
     currentAudio = !currentAudio;
     console.log("currentAudio: "+currentAudio);
@@ -569,8 +577,9 @@ function toggleMute() {
  * Enable/disable video
  */
 function toggleVid() {
-    if (!videoAvailable) { return }
-
+    if (!videoAvailable) {    
+        return; 
+    }
     currentVideo = !currentVideo;
     console.log("currentVideo: "+currentVideo);
 
@@ -630,11 +639,6 @@ function toggleReverse() {
         myVideo.className = "reverse";
         socket.emit('reverse', { room: room, id: clientId });
     }
-
-}
-
-function toggleDisplay() {
-    setScreen();
 
 }
 
